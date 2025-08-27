@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Academy Pro - Curso Básico</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Estilos -->
+    <style>
+        :root {
+            --primary: #00f7ff;
+            --primary-dark: #00c2c8;
+            --secondary: #7b2dff;
+            --dark: #0a0a1a;
+            --darker: #050510;
+            --light: #f0f0f0;
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --neon-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary-dark);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(123, 45, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(0, 247, 255, 0.1) 0%, transparent 50%);
+            overflow-x: hidden;
+        }
+        
+        h1, h2, h3, h4, .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 20px 0;
+            background: rgba(10, 10, 26, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .login-btn, .register-btn {
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            outline: none;
+        }
+        
+        .login-btn {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .login-btn:hover {
+            background: var(--primary);
+            color: var(--dark);
+            box-shadow: var(--neon-shadow);
+        }
+        
+        .register-btn {
+            background: var(--primary);
+            color: var(--dark);
+        }
+        
+        .register-btn:hover {
+            background: var(--primary-dark);
+            box-shadow: var(--neon-shadow);
+        }
+        
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 100px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(0, 247, 255, 0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+        
+        .hero .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 247, 255, 0.3);
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            max-width: 600px;
+            opacity: 0.9;
+        }
+        
+        .cta-button {
+            padding: 15px 40px;
+            background: var(--primary);
+            color: var(--dark);
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, var(--primary-dark), var(--secondary));
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            box-shadow: var(--neon-shadow);
+        }
+        
+        .cta-button:hover::before {
+            opacity: 1;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 100px 0;
+            position: relative;
+        }
+        
+        .features::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3QgZmlsbD0idXJsKCNwYXR0ZXJuKSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIvPjwvc3ZnPg==');
+            opacity: 0.3;
+            z-index: -1;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .section-title h2 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .section-title p {
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 40px 30px;
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 247, 255, 0.1), rgba(123, 45, 255, 0.1)));
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow);
+        }
+        
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+        
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(0, 247, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            color: var(--primary);
+            border: 1px solid var(--glass-border);
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .feature-card p {
+            line-height: 1.6;
+            opacity: 0.8;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--darker);
+            padding: 60px 0 30px;
+            position: relative;
+        }
+        
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--primary), transparent);
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+        }
+        
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .footer-logo i {
+            margin-right: 10px;
+            font-size: 1.8rem;
+        }
+        
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .footer-links a {
+            color: var(--light);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary);
+            opacity: 1;
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .social-icons a {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--glass);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--light);
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .social-icons a:hover {
+            background: var(--primary);
+            color: var(--dark);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 247, 255, 0.3);
+        }
+        
+        .copyright {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding-top: 30px;
+            margin-top: 30px;
+            border-top: 1px solid var(--glass-border);
+            opacity: 0.6;
+            font-size: 0.9rem;
+        }
+        
+        /* Modal de Autenticación - Estilo Futurista */
+        .auth-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 16, 0.9);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            overflow-y: auto;
+        }
+        
+        .auth-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .auth-container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            position: relative;
+            display: flex;
+            min-height: 500px;
+            margin: 20px;
+        }
+        
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                transparent,
+                transparent,
+                transparent,
+                var(--primary-dark),
+                var(--secondary)
+            );
+            transform: rotate(30deg);
+            opacity: 0.1;
+            z-index: -1;
+        }
+        
+        .auth-forms {
+            display: flex;
+            width: 200%;
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .auth-form-container {
+            width: 50%;
+            padding: 50px;
+            transition: all 0.6s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .login-container {
+            opacity: 1;
+        }
+        
+        .register-container {
+            opacity: 0;
+        }
+        
+        .auth-container.register-mode .auth-forms {
+            transform: translateX(-50%);
+        }
+        
+        .auth-container.register-mode .login-container {
+            opacity: 0;
+        }
+        
+        .auth-container.register-mode .register-container {
+            opacity: 1;
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .auth-header h2 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .close-auth {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            z-index: 10;
+        }
+        
+        .close-auth:hover {
+            color: var(--primary);
+        }
+        
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+        }
+        
+        .auth-form input {
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .auth-form input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 247, 255, 0.3);
+        }
+        
+        .auth-form input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .auth-submit {
+            padding: 15px;
+            background: var(--primary);
+            color: var(--dark);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .auth-submit:hover {
+            background: var(--primary-dark);
+            box-shadow: var(--neon-shadow);
+        }
+        
+        .auth-toggle {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .auth-toggle span {
+            color: var(--light);
+            opacity: 0.7;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .auth-toggle span:hover {
+            color: var(--primary);
+            opacity: 1;
+            transform: translateY(-2px);
+        }
+        
+        .auth-error {
+            color: #ff6b6b;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        
+        /* Efectos de partículas (simulados con pseudo-elementos) */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float linear infinite;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+        
+        /* Responsive - Móviles */
+        @media (max-width: 480px) {
+            /* Header */
+            .logo {
+                font-size: 1.2rem;
+            }
+            
+            .logo i {
+                font-size: 1.5rem;
+            }
+            
+            .auth-buttons {
+                gap: 10px;
+            }
+            
+            .login-btn, .register-btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            /* Hero */
+            .hero {
+                padding-top: 80px;
+                text-align: center;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+                margin-bottom: 15px;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+                margin-bottom: 20px;
+                max-width: 100%;
+            }
+            
+            .cta-button {
+                padding: 12px 30px;
+                font-size: 1rem;
+            }
+            
+            /* Features */
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
+            
+            .section-title p {
+                font-size: 1rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .feature-card {
+                padding: 30px 20px;
+            }
+            
+            .feature-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+            }
+            
+            .feature-card h3 {
+                font-size: 1.3rem;
+            }
+            
+            /* Footer */
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                text-align: center;
+            }
+            
+            .footer-logo {
+                justify-content: center;
+            }
+            
+            .social-icons {
+                justify-content: center;
+            }
+            
+            .footer-links {
+                align-items: center;
+            }
+            
+            /* Modal de Autenticación - Optimizado para móviles */
+            .auth-modal {
+                align-items: flex-start;
+                padding: 20px 0;
+            }
+            
+            .auth-container {
+                width: 95%;
+                min-height: auto;
+                max-height: 90vh;
+                margin: 0 auto;
+                flex-direction: column;
+            }
+            
+            .auth-forms {
+                flex-direction: column;
+                height: auto;
+                width: 100%;
+            }
+            
+            .auth-form-container {
+                width: 100%;
+                padding: 30px 20px;
+                min-height: 0;
+            }
+            
+            .auth-header h2 {
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+            }
+            
+            .auth-form {
+                gap: 15px;
+            }
+            
+            .auth-form input {
+                padding: 12px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .auth-submit {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+            
+            .auth-toggle span {
+                font-size: 0.9rem;
+            }
+            
+            .close-auth {
+                top: 10px;
+                right: 10px;
+                font-size: 1.3rem;
+            }
+            
+            .auth-container.register-mode .auth-forms {
+                transform: translateY(-50%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efecto de partículas -->
+    <div class="particles" id="particles"></div>
+    
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <span>OXOMAX-TRADING</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#features">Beneficios</a>
+                    <a href="#about">Nosotros</a>
+                    <a href="https://w.app/oxomax-trading">Contacto</a>
+                </div>
+                <div class="auth-buttons">
+                    <button class="login-btn" id="openLogin">Iniciar Sesión</button>
+                    <button class="register-btn" id="openRegister">Registrarse</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Domina el Mercado con Nuestro Curso Básico de Trading</h1>
+            <p>Aprende las estrategias fundamentales para operar en los mercados financieros de la mano de expertos con años de experiencia.</p>
+            <button class="cta-button" id="heroCta">Empieza Ahora</button>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>Beneficios Exclusivos</h2>
+                <p>Nuestro curso está diseñado para proporcionarte todas las herramientas necesarias para comenzar tu viaje en el trading.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3>Aprendizaje Estructurado</h3>
+                    <p>Curso paso a paso desde los conceptos básicos hasta estrategias aplicables inmediatamente.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3>Análisis de Mercado</h3>
+                    <p>Aprende a leer gráficos e identificar patrones que te permitan tomar decisiones informadas.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h3>Gestión de Riesgo</h3>
+                    <p>Domina las técnicas para proteger tu capital y maximizar tus ganancias potenciales.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-chart-line"></i> Oxomax-Trading
+                </div>
+                <div class="footer-links">
+                    <a href="#">Términos</a>
+                    <a href="#">Privacidad</a>
+                    <a href="#">FAQ</a>
+                    <a href="#">Soporte</a>
+                </div>
+                <div class="social-icons">
+                  <a href="https://w.app/oxomax-trading"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#"><i class="fab fa-telegram"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/@OXOMAX-TRADING/shorts"><i class="fab fa-youtube"></i></a>
+                </div>
+                <div class="copyright">
+                    © 2010 Oxomax-Trading. Todos los derechos reservados.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal de Autenticación - Versión Futurista -->
+    <div class="auth-modal" id="authModal">
+        <div class="auth-container" id="authContainer">
+            <div class="auth-forms">
+                <!-- Formulario de Login -->
+                <div class="auth-form-container login-container">
+                    <div class="auth-header">
+                        <h2>Iniciar Sesión</h2>
+                    </div>
+                    <form class="auth-form" id="loginForm">
+                        <div id="authError" class="auth-error"></div>
+                        <input type="email" id="loginEmail" placeholder="Correo electrónico" required>
+                        <input type="password" id="loginPassword" placeholder="Contraseña" required>
+                        <button type="submit" class="auth-submit">Iniciar Sesión</button>
+                    </form>
+                    <div class="auth-toggle">
+                        <span id="toggleToRegister">¿No tienes una cuenta? <strong>Regístrate</strong></span>
+                    </div>
+                </div>
+                
+                <!-- Formulario de Registro -->
+                <div class="auth-form-container register-container">
+                    <div class="auth-header">
+                        <h2>Registrarse</h2>
+                    </div>
+                    <form class="auth-form" id="registerForm">
+                        <div id="registerError" class="auth-error"></div>
+                        <input type="text" id="registerName" placeholder="Nombre completo" required>
+                        <input type="email" id="registerEmail" placeholder="Correo electrónico" required>
+                        <input type="password" id="registerPassword" placeholder="Contraseña" required>
+                        <input type="password" id="registerConfirmPassword" placeholder="Confirmar contraseña" required>
+                        <button type="submit" class="auth-submit">Registrarse</button>
+                    </form>
+                    <div class="auth-toggle">
+                        <span id="toggleToLogin">¿Ya tienes una cuenta? <strong>Inicia Sesión</strong></span>
+                    </div>
+                </div>
+            </div>
+            <button class="close-auth" id="closeAuth">&times;</button>
+        </div>
+    </div>
+
+    <script>
+        // Inicializar Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD3MI1klgBSHs1h6QT4VPNoScCfCwMV_Ck",
+            authDomain: "usuario-b0384.firebaseapp.com",
+            databaseURL: "https://usuario-b0384-default-rtdb.firebaseio.com",
+            projectId: "usuario-b0384",
+            storageBucket: "usuario-b0384.firebasestorage.app",
+            messagingSenderId: "196266170863",
+            appId: "1:196266170863:web:4ea57f489df94aba94fe1a"
+        };
+        
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+        
+        // Elementos del DOM
+        const authModal = document.getElementById('authModal');
+        const authContainer = document.getElementById('authContainer');
+        const openLogin = document.getElementById('openLogin');
+        const openRegister = document.getElementById('openRegister');
+        const closeAuth = document.getElementById('closeAuth');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const toggleToRegister = document.getElementById('toggleToRegister');
+        const toggleToLogin = document.getElementById('toggleToLogin');
+        const authError = document.getElementById('authError');
+        const registerError = document.getElementById('registerError');
+        const heroCta = document.getElementById('heroCta');
+        const particlesContainer = document.getElementById('particles');
+        
+        // Crear efecto de partículas
+        function createParticles() {
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Tamaño aleatorio entre 2px y 6px
+                const size = Math.random() * 4 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Posición inicial aleatoria
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.bottom = `-${size}px`;
+                
+                // Duración de la animación aleatoria
+                const duration = Math.random() * 20 + 10;
+                particle.style.animationDuration = `${duration}s`;
+                
+                // Retraso aleatorio
+                particle.style.animationDelay = `${Math.random() * 10}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Mostrar modal de login
+        openLogin.addEventListener('click', () => {
+            authModal.classList.add('active');
+            authContainer.classList.remove('register-mode');
+        });
+        
+        // Mostrar modal de registro
+        openRegister.addEventListener('click', () => {
+            authModal.classList.add('active');
+            authContainer.classList.add('register-mode');
+        });
+        
+        // Cerrar modal
+        closeAuth.addEventListener('click', () => {
+            authModal.classList.remove('active');
+        });
+        
+        // Alternar entre login y registro
+        toggleToRegister.addEventListener('click', () => {
+            authContainer.classList.add('register-mode');
+        });
+        
+        toggleToLogin.addEventListener('click', () => {
+            authContainer.classList.remove('register-mode');
+        });
+        
+        // Cerrar modal al hacer clic fuera
+        authModal.addEventListener('click', (e) => {
+            if (e.target === authModal) {
+                authModal.classList.remove('active');
+            }
+        });
+        
+        // Login
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Login exitoso
+                    authModal.classList.remove('active');
+                    loginForm.reset();
+                    window.location.href = 'dashboard.html';
+                })
+                .catch((error) => {
+                    authError.textContent = error.message;
+                });
+        });
+        
+        // Registro
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                registerError.textContent = 'Las contraseñas no coinciden';
+                return;
+            }
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Registro exitoso
+                    const user = userCredential.user;
+                    
+                    // Guardar datos adicionales en la base de datos
+                    const userRef = database.ref('users/' + user.uid);
+                    userRef.set({
+                        name: name,
+                        email: email,
+                        createdAt: firebase.database.ServerValue.TIMESTAMP,
+                        courseAccess: false,
+                        lastLogin: firebase.database.ServerValue.TIMESTAMP
+                    });
+                    
+                    authModal.classList.remove('active');
+                    registerForm.reset();
+                    window.location.href = 'dashboard.html';
+                })
+                .catch((error) => {
+                    registerError.textContent = error.message;
+                });
+        });
+        
+        // CTA button
+        heroCta.addEventListener('click', () => {
+            authModal.classList.add('active');
+            authContainer.classList.add('register-mode');
+        });
+        
+        // Verificar estado de autenticación
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Usuario logueado
+                openLogin.style.display = 'none';
+                openRegister.style.display = 'none';
+                // Aquí podrías mostrar un botón de perfil o logout
+            } else {
+                // Usuario no logueado
+                openLogin.style.display = 'inline-block';
+                openRegister.style.display = 'inline-block';
+            }
+        });
+        
+        // Crear partículas al cargar la página
+        window.addEventListener('load', createParticles);
+    </script>
+</body>
+</html>
